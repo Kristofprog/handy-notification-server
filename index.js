@@ -10,28 +10,33 @@ const app = express();
 app.use(express.json());
 
 app.post('/send-notification', async (req, res) => {
-  const { receiverFcmToken, title, body } = req.body;
+      // 1. Read new fields
+      const { receiverFcmToken, title, body, chatId, senderId } = req.body; 
 
-  if (!receiverFcmToken) {
-    return res.status(400).send('Missing token');
-  }
+      if (!receiverFcmToken) {
+        return res.status(400).send('Missing token');
+      }
 
-  const message = {
-    token: receiverFcmToken,
-    notification: {
-      title: title,
-      body: body
-    }
-  };
+      const message = {
+        token: receiverFcmToken,
+        notification: {
+          title: title,
+          body: body
+        },
+        data: {
+            chatId: chatId,
+            otherUserId: senderId
+        }
+      };
 
-  try {
-    await admin.messaging().send(message);
-    res.status(200).send('Sent');
-  } catch (error) {
-    console.error('Error sending message:', error);
-    res.status(500).send(error.toString());
-  }
-});
+      try {
+        await admin.messaging().send(message);
+        res.status(200).send('Sent');
+      } catch (error) {
+        console.error('Error sending message:', error);
+        res.status(500).send(error.toString());
+      }
+    });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
